@@ -1,10 +1,10 @@
 # Clash in Docker for EECS470
 
-Clash is a shallow-embedded hardware description language in Haskell. This repo is a docker setup for consistent clash build.
+[Clash](https://clash-lang.org/) is a shallow-embedded hardware description language in Haskell. This repo is a docker setup for consistent clash build.
 
 ## Build Image
 
-Thanks to docker building a container can be easily reproduced.
+Thanks to docker, the process of building a container can be easily reproduced.
 
 To build a docker image,
 
