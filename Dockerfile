@@ -27,11 +27,17 @@ COPY zsh/.zshrc /root/.zshrc
 COPY zsh/.zshrcx /root/.zshrcx
 COPY zsh/.p10k.zsh /root/.p10k.zsh
 
+# update the vscode template folder for using hls with clash
+COPY .vscode /root/.vscode
+
 # build clash
 COPY clash /root/clash
 RUN PATH=/root/.ghcup/bin:$PATH && cd /root/clash && cabal update && cabal build
 
 # optionally, build formatter
 RUN PATH=/root/.ghcup/bin:$PATH && cabal install ormolu
+
+# finally, let zinit configure itself
+RUN zsh -c ". ~/.zshrc"
 
 CMD ["zsh"]
