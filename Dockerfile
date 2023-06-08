@@ -40,4 +40,8 @@ RUN PATH=/root/.ghcup/bin:$PATH && cabal install ormolu
 # finally, let zinit configure itself
 RUN zsh -c ". ~/.zshrc"
 
+# riscv32 toolchain
+RUN curl https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2023.05.31/riscv32-elf-ubuntu-22.04-nightly-2023.05.31-nightly.tar.gz \
+    -o /tmp/riscv32-elf-toolchain.tar.gz && tar -xzvf /tmp/riscv32-elf-toolchain.tar.gz -C /opt && rm /tmp/riscv32-elf-toolchain.tar.gz
+
 CMD ["zsh"]
