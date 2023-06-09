@@ -39,13 +39,13 @@ RUN PATH=/home/architect/.ghcup/bin:$PATH && cd /home/architect/clash-from-the-g
 # optionally, build formatter
 RUN PATH=/home/architect/.ghcup/bin:$PATH && cabal install ormolu
 
+# update the vscode template folder for using hls with clash
+COPY --chown=architect:architect .vscode /home/architect/.vscode
+
 # zsh configs
 COPY --chown=architect:architect zsh/ /home/architect/
 
 # finally, let zinit configure itself
 RUN zsh -c "export TERM=xterm-256color && source ~/.zshrc"
-
-# update the vscode template folder for using hls with clash
-COPY --chown=architect:architect .vscode /home/architect/.vscode
 
 CMD ["zsh"]
