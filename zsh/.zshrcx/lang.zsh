@@ -3,14 +3,6 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
-# rust and cargo
-source "$HOME/.cargo/env"
-export PATH=$PATH:~/.cargo/bin
-
-# # opam configuration
-# test -r "${HOME}/.opam/opam-init/init.zsh && . ${HOME}/.opam/opam-init/init.zsh" > /dev/null 2> /dev/null || true
-# eval `opam config env`
-
 # ghcup
 [ -f "${HOME}/.ghcup/env" ] && source "${HOME}/.ghcup/env" # ghcup-env
 export PATH=$PATH:~/.ghcup/bin

@@ -1,31 +1,32 @@
 FROM archlinux:latest
 
+# add mirrors to pacman
+COPY mirrorlist /etc/pacman.d/mirrorlist
+
 # update system and install critical packages
-RUN pacman -Syyu --noconfirm
+RUN pacman -Syu --noconfirm
 RUN pacman -S --noconfirm --needed \
-    sudo base-devel zsh git wget zip tmux neovim exa
+    sudo base-devel zsh git wget zip tmux neovim gcc gdb llvm openssl openssh
 
 # create a no password user (AUR packages require non-root user)
-RUN useradd -m architect && usermod -aG video,lp,input architect
+RUN useradd -m architect -s /bin/zsh && usermod -aG video,lp,input architect
 RUN echo "architect ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 USER architect
 
-# zsh configs
-COPY zsh/.zshrc /home/architect/.zshrc
-COPY zsh/.zshrcx /home/architect/.zshrcx
-COPY zsh/.p10k.zsh /home/architect/.p10k.zsh
-
 # install python and rust
-RUN sudo pacman -S --noconfirm --needed python-pip rustup && rustup default stable
+RUN sudo pacman -S --noconfirm --needed python-pip rustup exa && rustup default stable
+RUN cargo install bat
 
-# install paru, the aur helper
-RUN cd /home/architect && git clone --depth 1 https://aur.archlinux.org/paru.git
-RUN cd /home/architect/paru && makepkg -si --noconfirm && cd .. && rm -rf paru
+# install paru, the AUR helper
+RUN cd /home/architect && git clone https://aur.archlinux.org/paru-bin.git
+RUN cd /home/architect/paru-bin && makepkg --noconfirm -si
+RUN rm -rf /home/architect/paru-bin
 
 # install needed package for development
-RUN paru -S --noconfirm --needed \
+RUN paru -Syu --noconfirm && paru -S --noconfirm --needed \
     verilator ghcup-hs-bin riscv-gnu-toolchain-bin elf2hex verible-bin autojump
+RUN pip install cocotb
 
 # install ghc toolchain
 RUN PATH=/home/architect/.ghcup/bin:$PATH && ghcup install ghc 9.0.2 && ghcup set ghc 9.0.2
@@ -39,10 +40,15 @@ RUN PATH=/home/architect/.ghcup/bin:$PATH && cd /home/architect/clash-from-the-g
 # optionally, build formatter
 RUN PATH=/home/architect/.ghcup/bin:$PATH && cabal install ormolu
 
-# update the vscode template folder for using hls with clash
-COPY .vscode /home/architect/.vscode
+# zsh configs
+COPY --chown=architect:architect zsh/.zshrc /home/architect/.zshrc
+COPY --chown=architect:architect zsh/.zshrcx /home/architect/.zshrcx
+COPY --chown=architect:architect zsh/.p10k.zsh /home/architect/.p10k.zsh
 
 # finally, let zinit configure itself
-RUN zsh -c "source ~/.zshrc"
+RUN zsh -c "export TERM=xterm-256color && source ~/.zshrc"
+
+# update the vscode template folder for using hls with clash
+COPY --chown=architect:architect .vscode /home/architect/.vscode
 
 CMD ["zsh"]

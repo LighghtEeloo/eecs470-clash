@@ -24,3 +24,5 @@ load-file ~/.zshrcx/lang.zsh
 
 # Source custom
 load-file ~/.zshrcx/custom.zsh
+
+cd $HOME
