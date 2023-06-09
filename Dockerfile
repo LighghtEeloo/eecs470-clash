@@ -51,4 +51,7 @@ RUN zsh -c "export TERM=xterm-256color && source ~/.zshrc"
 # update the vscode template folder for using hls with clash
 COPY --chown=architect:architect .vscode /home/architect/.vscode
 
+# clean up
+RUN paru -Scc --noconfirm
+
 CMD ["zsh"]
