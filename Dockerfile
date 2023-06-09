@@ -1,47 +1,48 @@
-FROM debian:bullseye
+FROM archlinux:latest
 
-RUN apt-get update && apt-get install -y \
-    zsh \
-    git \
-    build-essential curl libffi-dev libffi7 libgmp-dev \
-    libgmp10 libncurses-dev libncurses5 libtinfo5 \
-    manpages-dev \
-    wget \
-    zip \
-    tmux \
-    neovim \
-    libnuma-dev \
-    llvm \
-    autojump
+# update system and install critical packages
+RUN pacman -Syyu --noconfirm
+RUN pacman -S --noconfirm --needed \
+    sudo base-devel zsh git wget zip tmux neovim exa
 
-# install ghc toolchain
-RUN curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
-RUN PATH=/root/.ghcup/bin:$PATH && ghcup install ghc 9.0.2 && ghcup set ghc 9.0.2
+# create a no password user (AUR packages require non-root user)
+RUN useradd -m architect && usermod -aG video,lp,input architect
+RUN echo "architect ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-# install rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-RUN . /root/.cargo/env && CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse cargo install exa
+USER architect
 
 # zsh configs
-COPY zsh/.zshrc /root/.zshrc
-COPY zsh/.zshrcx /root/.zshrcx
-COPY zsh/.p10k.zsh /root/.p10k.zsh
+COPY zsh/.zshrc /home/architect/.zshrc
+COPY zsh/.zshrcx /home/architect/.zshrcx
+COPY zsh/.p10k.zsh /home/architect/.p10k.zsh
 
-# update the vscode template folder for using hls with clash
-COPY .vscode /root/.vscode
+# install python and rust
+RUN sudo pacman -S --noconfirm --needed python-pip rustup && rustup default stable
+
+# install paru, the aur helper
+RUN cd /home/architect && git clone --depth 1 https://aur.archlinux.org/paru.git
+RUN cd /home/architect/paru && makepkg -si --noconfirm && cd .. && rm -rf paru
+
+# install needed package for development
+RUN paru -S --noconfirm --needed \
+    verilator ghcup-hs-bin riscv-gnu-toolchain-bin elf2hex verible-bin autojump
+
+# install ghc toolchain
+RUN PATH=/home/architect/.ghcup/bin:$PATH && ghcup install ghc 9.0.2 && ghcup set ghc 9.0.2
+RUN PATH=/home/architect/.ghcup/bin:$PATH && ghcup install cabal 3.6.2.0 && ghcup set cabal 3.6.2.0
+RUN PATH=/home/architect/.ghcup/bin:$PATH && ghcup install stack 2.9.3 && ghcup set stack 2.9.3
 
 # build clash
-COPY clash /root/clash
-RUN PATH=/root/.ghcup/bin:$PATH && cd /root/clash && cabal update && cabal build
+RUN cd /home/architect && git clone https://github.com/LighghtEeloo/clash-from-the-gates-up.git
+RUN PATH=/home/architect/.ghcup/bin:$PATH && cd /home/architect/clash-from-the-gates-up && cabal update && cabal build
 
 # optionally, build formatter
-RUN PATH=/root/.ghcup/bin:$PATH && cabal install ormolu
+RUN PATH=/home/architect/.ghcup/bin:$PATH && cabal install ormolu
+
+# update the vscode template folder for using hls with clash
+COPY .vscode /home/architect/.vscode
 
 # finally, let zinit configure itself
-RUN zsh -c ". ~/.zshrc"
-
-# riscv32 toolchain
-RUN curl https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2023.05.31/riscv32-elf-ubuntu-22.04-nightly-2023.05.31-nightly.tar.gz \
-    -o /tmp/riscv32-elf-toolchain.tar.gz && tar -xzvf /tmp/riscv32-elf-toolchain.tar.gz -C /opt && rm /tmp/riscv32-elf-toolchain.tar.gz
+RUN zsh -c "source ~/.zshrc"
 
 CMD ["zsh"]
