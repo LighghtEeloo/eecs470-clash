@@ -1,21 +1,17 @@
 # .local/bin
-if [ -d "$HOME/.local/bin" ] ; then
-    PATH="$HOME/.local/bin:$PATH"
-fi
+append_path "$HOME/.local/bin"
+
+# rust
+append_path "$HOME/.cargo/bin"
 
 # ghcup
 [ -f "${HOME}/.ghcup/env" ] && source "${HOME}/.ghcup/env" # ghcup-env
-export PATH=$PATH:~/.ghcup/bin
+append_path "$HOME/.ghcup/bin"
 
 # cabal
-export PATH=$PATH:~/.cabal/bin
-
-"veri-vvp" () {
-    iverilog "$@" && vvp a.out -n && rm -f a.out
-}
+append_path "$HOME/.cabal/bin"
 
 # git tricks
-
 "git-contribution-line" () {
     git ls-files | while read f; do git blame -w -M -C -C --line-porcelain "$f" | grep -I '^author '; done | sort -f | uniq -ic | sort -n --reverse | cat
 }
