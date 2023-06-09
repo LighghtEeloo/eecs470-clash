@@ -1,12 +1,11 @@
-FROM archlinux:latest
+FROM archlinux:base-devel
 
 # add mirrors to pacman
 COPY mirrorlist /etc/pacman.d/mirrorlist
 
 # update system and install critical packages
-RUN pacman -Syu --noconfirm
-RUN pacman -S --noconfirm --needed \
-    sudo base-devel zsh git wget zip tmux neovim gcc gdb llvm openssl openssh
+RUN pacman -Syu --noconfirm && pacman -S --noconfirm --needed \
+    sudo zsh git wget zip tmux neovim gcc gdb llvm openssh
 
 # create a no password user (AUR packages require non-root user)
 RUN useradd -m architect -s /bin/zsh && usermod -aG video,lp,input architect
@@ -16,7 +15,7 @@ USER architect
 
 # install python and rust
 RUN sudo pacman -S --noconfirm --needed python-pip rustup exa && rustup default stable
-RUN cargo install bat
+RUN cargo install bat && pip install cocotb
 
 # install paru, the AUR helper
 RUN cd /home/architect && git clone https://aur.archlinux.org/paru-bin.git
@@ -25,8 +24,8 @@ RUN rm -rf /home/architect/paru-bin
 
 # install needed package for development
 RUN paru -Syu --noconfirm && paru -S --noconfirm --needed \
-    verilator ghcup-hs-bin riscv-gnu-toolchain-bin elf2hex verible-bin autojump
-RUN pip install cocotb
+    verilator ghcup-hs-bin riscv-gnu-toolchain-bin elf2hex verible-bin autojump && \
+    paru -Scc --noconfirm
 
 # install ghc toolchain
 RUN PATH=/home/architect/.ghcup/bin:$PATH && ghcup install ghc 9.0.2 && ghcup set ghc 9.0.2
@@ -41,17 +40,12 @@ RUN PATH=/home/architect/.ghcup/bin:$PATH && cd /home/architect/clash-from-the-g
 RUN PATH=/home/architect/.ghcup/bin:$PATH && cabal install ormolu
 
 # zsh configs
-COPY --chown=architect:architect zsh/.zshrc /home/architect/.zshrc
-COPY --chown=architect:architect zsh/.zshrcx /home/architect/.zshrcx
-COPY --chown=architect:architect zsh/.p10k.zsh /home/architect/.p10k.zsh
+COPY --chown=architect:architect zsh/ /home/architect/
 
 # finally, let zinit configure itself
 RUN zsh -c "export TERM=xterm-256color && source ~/.zshrc"
 
 # update the vscode template folder for using hls with clash
 COPY --chown=architect:architect .vscode /home/architect/.vscode
-
-# clean up
-RUN paru -Scc --noconfirm
 
 CMD ["zsh"]
