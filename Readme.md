@@ -19,18 +19,18 @@ And later if:
 
 1. you have a project called simple, and
 2. the project is located at `pwd`, namely you're at the project root, and
-3. you want to mount the project into the container's `/root/simple` dir,
+3. you want to mount the project into the container's `/home/architect/simple` dir,
 
 then you can run a container called "simple" based on the image,
 
 ```console
-docker run -it --name simple -v `pwd`:/root/simple eecs470-clash
+docker run -it --name simple -v `pwd`:/home/architect/simple eecs470-clash
 ```
 You can run it multiple times for different projects.
 
 ## Final Tips Before You Start Working
 
-I've also prepared a `settings.json` file for `hls` if you're using vscode. You may like to install the `Haskell` extension after copying the `.vscode` folder, located under `/root`, into your project.
+I've also prepared a `settings.json` file for `hls` if you're using vscode. You may like to install the `Haskell` extension after copying the `.vscode` folder, located under `/home/architect`, into your project.
 
 ## About Personal Configurations
 
