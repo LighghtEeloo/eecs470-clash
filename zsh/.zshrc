@@ -16,13 +16,11 @@ load-file ~/.zshrcx/alias.zsh
 # Source functions
 load-file ~/.zshrcx/fn.zsh
 
-# Source utilities 
+# Source utilities
 load-file ~/.zshrcx/utils.zsh
 
-# Source programming languages 
+# Source programming languages
 load-file ~/.zshrcx/lang.zsh
 
 # Source custom
 load-file ~/.zshrcx/custom.zsh
-
-cd $HOME
