@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
 # install ghc toolchain
 RUN curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
 RUN PATH=/root/.ghcup/bin:$PATH && ghcup install ghc 9.0.2 && ghcup set ghc 9.0.2
+RUN PATH=/root/.ghcup/bin:$PATH && ghcup install hls 1.10.0.0 && ghcup set hls 1.10.0.0
 
 # install rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
@@ -28,7 +29,7 @@ COPY zsh/.zshrcx /root/.zshrcx
 COPY zsh/.p10k.zsh /root/.p10k.zsh
 
 # update the vscode template folder for using hls with clash
-COPY .vscode /root/.vscode
+COPY .vscode /root/.vscode_template
 
 # build clash
 COPY clash /root/clash
@@ -39,9 +40,5 @@ RUN PATH=/root/.ghcup/bin:$PATH && cabal install ormolu
 
 # finally, let zinit configure itself
 RUN zsh -c ". ~/.zshrc"
-
-# riscv32 toolchain
-RUN curl https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2023.05.31/riscv32-elf-ubuntu-22.04-nightly-2023.05.31-nightly.tar.gz \
-    -o /tmp/riscv32-elf-toolchain.tar.gz && tar -xzvf /tmp/riscv32-elf-toolchain.tar.gz -C /opt && rm /tmp/riscv32-elf-toolchain.tar.gz
 
 CMD ["zsh"]
