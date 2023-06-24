@@ -28,12 +28,12 @@ RUN PATH=/root/.ghcup/bin:$PATH && ghcup install hls 1.10.0.0 && ghcup set hls 1
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 RUN . /root/.cargo/env && CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse cargo install exa
 
+# optionally, build formatter
+RUN PATH=/root/.ghcup/bin:$PATH && cabal install ormolu
+
 # build clash
 RUN git clone https://github.com/LighghtEeloo/clash-from-the-gates-up.git /root/clash
 RUN PATH=/root/.ghcup/bin:$PATH && cd /root/clash && cabal update && cabal build
-
-# optionally, build formatter
-RUN PATH=/root/.ghcup/bin:$PATH && cabal install ormolu
 
 # zsh configs
 COPY zsh/.zshrc /root/.zshrc
